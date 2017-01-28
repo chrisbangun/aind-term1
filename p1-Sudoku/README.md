@@ -16,7 +16,7 @@ by adding the two main diagonals sudoku to our units collections.
 Then, the rest implementation are much likely the same. The eliminate and only choice strategy will put all values
 in boxes in related diagonal units into consideration. That is how we include diagonals to constraint propagation.
 
-# my repo: https://github.com/chrisbangun/aind-term1/tree/master/p1-Sudoku
+#### my repo: https://github.com/chrisbangun/aind-term1/tree/master/p1-Sudoku
 
 ### Install
 
