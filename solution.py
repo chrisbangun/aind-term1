@@ -7,15 +7,32 @@ def cross(A, B):
 rows = 'ABCDEFGHI'
 cols = '123456789'
 boxes = cross(rows, cols)
-row_units = [cross(r, cols) for r in rows]
-col_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
-unitlist = row_units + col_units + square_units
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
-diagonal1 = [r+c for r, c in zip(rows, cols)]
-diagonal2 = [r+c for r, c in zip(rows, sorted(cols, reverse=True))]
+unitlist = []
+units = {}
+peers = {}
 
+def create_board(diagonal=True):
+    """
+    create board and initialize all internal variables
+    with param to define additional constraint to solve the problem
+    :param diagonal: True if we need to consider diagonal as an additional constraints
+    :return:
+    """
+    global unitlist, units, peers
+
+    row_units = [cross(r, cols) for r in rows]
+    col_units = [cross(rows, c) for c in cols]
+    square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+    unitlist = row_units + col_units + square_units
+
+    if diagonal:
+        diagonal1 = [r + c for r, c in zip(rows, cols)]
+        diagonal2 = [r + c for r, c in zip(rows, sorted(cols, reverse=True))]
+        unitlist.append(diagonal1)
+        unitlist.append(diagonal2)
+
+    units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+    peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
 
 
 def assign_value(values, box, value):
@@ -50,8 +67,8 @@ def naked_twins(values):
                     if peer in unit:
                         for square in unit:
                             if square != peer and square != box:
-                                values[square] = values[square].replace(d1, '')
-                                values[square] = values[square].replace(d2, '')
+                                assign_value(values, square, values[square].replace(d1, ''))
+                                assign_value(values, square, values[square].replace(d2, ''))
                                 if square in filtered_boxes:
                                     filtered_boxes.remove(square)
     return values
@@ -74,6 +91,7 @@ def grid_values(grid):
             chars.append(c)
         if c == '.':
             chars.append(digits)
+    assert len(chars) == 81
     return dict(zip(boxes, chars))
 
 
@@ -90,22 +108,9 @@ def display(values):
     for r in rows:
         print(''.join(values[r + c].center(width) + ('|' if c in '36' else '')
                       for c in cols))
-        if r in 'CF': print(line)
-
-
-def eliminate_diagonal(values, box, diagonal, digits):
-    """
-    Eliminate
-    :param values:
-    :param box:
-    :param diagonal:
-    :param digits:
-    :return:
-    """
-    for square in diagonal:
-        if len(values[square]) > 1 and square != box:
-            values[square] = values[square].replace(digits, '')
-    return values
+        if r in 'CF':
+            print(line)
+    print()
 
 
 def eliminate(values):
@@ -113,25 +118,13 @@ def eliminate(values):
     :param values:
     :return:
     """
-    center_square = 'E5'
     solved_boxes = [box for box in values.keys() if len(values[box]) == 1]
 
     for box in solved_boxes:
         digits = values[box]
-        diagonal = []
-        if box in diagonal1 and box != center_square:
-            diagonal = diagonal1
-            values = eliminate_diagonal(values, box, diagonal, digits)
-        elif box in diagonal2 and box != center_square:
-            diagonal = diagonal2
-            values = eliminate_diagonal(values, box, diagonal, digits)
-        elif box == center_square:
-            diagonal = set(diagonal1 + diagonal2)
-            values = eliminate_diagonal(values, box, diagonal, digits)
-
         for peer in peers[box]:
-            if len(values[peer]) > 1 and peer not in diagonal:
-                values[peer] = values[peer].replace(digits, '')
+            if len(values[peer]) > 1:
+                assign_value(values, peer, values[peer].replace(digits, ''))
 
     return values
 
@@ -141,14 +134,11 @@ def only_choice(values):
     :param values:
     :return:
     """
-    digits = '123456789'
-    unitlist.append(diagonal1)
-    unitlist.append(diagonal2)
     for unit in unitlist:
-        for digit in digits:
+        for digit in '123456789':
             digit_exist = [box for box in unit if digit in values[box]]
             if len(digit_exist) == 1:
-                values = assign_value(values, digit_exist[0], digit)
+                assign_value(values, digit_exist[0], digit)
 
     return values
 
@@ -171,19 +161,27 @@ def reduce_puzzle(values):
     return values
 
 
-def solve(grid):
+def solve(grid, diagonal=True):
     """
         Find the solution to a Sudoku grid.
         Args:
-            grid(string): a string representing a sudoku grid.
+            :param grid: a string representing a sudoku grid.
                 Example: '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+            :param diagonal: True for solving diagonal sudoku
         Returns:
             The dictionary representation of the final sudoku grid. False if no solution exists.
         """
+    create_board(diagonal)
     return search(grid_values(grid))
 
 
 def search(values):
+    """
+    search and try all possible values
+    using DFS and CSP
+    :param values:
+    :return:
+    """
     values = reduce_puzzle(values)
 
     if not values:
@@ -204,7 +202,12 @@ def search(values):
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    display(solve(diag_sudoku_grid))
+    display(solve(diag_sudoku_grid, True))
+
+    # example for solving a general sudoku puzzle
+    # top95_1_grid = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+    # top95_2_grid = '52...6.........7.13...........4..8..6......5...........418.........3..2...87.....'
+    # display(solve(top95_2_grid, False))
 
     try:
         from visualize import visualize_assignments
