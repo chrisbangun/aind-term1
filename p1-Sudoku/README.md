@@ -4,7 +4,9 @@
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
 A:
-by enforcing the constraint that for every twin squares, there is no boxes that can contains the twin values.
+by enforcing the constraint that for every twin squares, there is no boxes that can contains the twin values. We can
+see the naked-twins problem as one of a useful strategies in solving sudoku puzzle as it tries to exclude possibilities
+in other squares in the same group.
 On my current approach, I started by getting all boxes that only has two values in it, then find the twins in their
 related peers. Once the twins is found, go through all the boxes in the related units, remove digits from twins value
 from other unit boxes. Therefore, no boxes in any unit has the twin values outside the two naked twins squares.
@@ -12,8 +14,10 @@ from other unit boxes. Therefore, no boxes in any unit has the twin values outsi
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
 A:
-by adding the two main diagonals sudoku to our units collections.
-Then, the rest implementation are much likely the same. The eliminate and only choice strategy will put all values
+by adding the two main diagonals sudoku to our units collections. It is quite the same with the original sudoku, the
+only different is we need to consider the two main diagonals of the sudoku. By which, there is no duplicate values in
+both of the diagonals.
+The rest implementation are much likely the same. The eliminate and only choice strategy will put all values
 in boxes in related diagonal units into consideration. That is how we include diagonals to constraint propagation.
 
 #### my repo: https://github.com/chrisbangun/aind-term1/tree/master/p1-Sudoku
