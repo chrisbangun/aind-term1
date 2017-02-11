@@ -110,23 +110,23 @@ def get_open_area(game, player):
     return accessible
 
 
-def mid_game_eval(game, player):
+# def mid_game_eval(game, player):
 
-    def center_score(player_loc):
-        center = game.width / 2
-        return - abs(player_loc[0] - center) - abs(player_loc[1] - center)
+#     def center_score(player_loc):
+#         center = game.width / 2
+#         return - abs(player_loc[0] - center) - abs(player_loc[1] - center)
 
-    my_cords = game.get_player_location(player)
-    opp_cords = game.get_player_location(game.get_opponent(player))
+#     my_cords = game.get_player_location(player)
+#     opp_cords = game.get_player_location(game.get_opponent(player))
 
-    height = abs(my_cords[0] - opp_cords[0])
-    width = abs(my_cords[1] - opp_cords[1])
+#     height = abs(my_cords[0] - opp_cords[0])
+#     width = abs(my_cords[1] - opp_cords[1])
 
-    my_legal_moves = len(game.get_legal_moves(player))
-    opp_legal_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    mobility_score = my_legal_moves - opp_legal_moves
-    proximity_to_center = center_score(my_cords) - center_score(opp_cords)
-    return 3 * mobility_score + proximity_to_center
+#     my_legal_moves = len(game.get_legal_moves(player))
+#     opp_legal_moves = len(game.get_legal_moves(game.get_opponent(player)))
+#     mobility_score = my_legal_moves - opp_legal_moves
+#     proximity_to_center = center_score(my_cords) - center_score(opp_cords)
+#     return 3 * mobility_score + proximity_to_center
 
 
 def custom_score(game, player):
